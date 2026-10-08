@@ -218,3 +218,29 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Python and virtual environments
+python-version
+*.py[cod]
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local environment and logs
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+
+# Jupyter and editor files
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.spyderproject
+.spyproject
+
+# Generated experiment artifacts
+results/experiments/**/*.tfevents
+results/experiments/**/*.tmp
