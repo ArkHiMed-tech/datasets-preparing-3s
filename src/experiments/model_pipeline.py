@@ -37,7 +37,7 @@ class NotebookFeatureEngineer:
         return X
 
 
-def create_pipeline():
+def create_pipeline(random_seed: int = 42, epochs: int = 100):
     return Pipeline(
         steps=[
             ("zero_to_nan", ZeroToNanTransformer()),
@@ -49,8 +49,8 @@ def create_pipeline():
                 LGBMClassifier(
                     learning_rate=0.05,
                     max_depth=3,
-                    n_estimators=100,
-                    random_state=42,
+                    n_estimators=epochs,
+                    random_state=random_seed,
                     verbose=-1,
                 ),
             ),

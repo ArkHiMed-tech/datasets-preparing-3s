@@ -1,6 +1,96 @@
 # Diabetes dataset preparation
 
-Проект выполняет подготовку и демонстрацию данных для обучения модели классификации диабета. Проект рассчитан на запуск в Linux и использует относительные пути, вычисляемые от расположения исходного файла.
+Проект выполняет подготовку и демонстрацию данных для обучения модели классификации диабета. Он использует относительные пути и позволяет запускать подготовку, обучение и проверку с помощью `uv` и Bash.
+
+## Краткое описание проекта
+
+Проект очищает и преобразует датасет диабета, обучает модель LightGBM через пайплайн с препроцессинговыми шагами, сохраняет модель и выполняет валидацию на отдельных метриках. Для каждого запуска результаты validation сохраняются в каталоге `results/experiments/`.
+
+## Требования к окружению
+
+- Python `>=3.10,<3.11`.
+- `uv` для создания и запуска окружения.
+- На Linux и WSL для установки `uv` используйте официальный скрипт установки:
+
+  ```bash
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+
+- На Windows можно установить `uv` через Winget:
+
+  ```powershell
+  winget install --id=astral-sh.uv -e
+  ```
+
+## Установка зависимостей
+
+Из корня проекта выполните:
+
+```bash
+uv sync --locked
+```
+
+Команда создаёт окружение из `pyproject.toml` и `uv.lock`. При необходимости окружение можно пересоздать:
+
+```bash
+uv sync --reinstall --locked
+```
+
+## Запуск проекта
+
+Подготовьте данные, обучите модель и выполните валидацию:
+
+```bash
+uv run python src/experiments/prepare_datasets.py \
+  --model-name diabetes_best_model_pipeline \
+  --data-path data/raw \
+  --random-seed 42 \
+  --epochs 100 \
+  --output-dir .
+
+uv run python src/experiments/validate_pipeline.py \
+  --model-name diabetes_best_model_pipeline \
+  --output-dir .
+```
+
+Для автоматического запуска обоих этапов используйте Bash-скрипт:
+
+```bash
+bash scripts/run_project.sh
+```
+
+## Описание Bash-скрипта
+
+Скрипт `scripts/run_project.sh` выполняет:
+
+1. Проверку существования `pyproject.toml` и входного датасета.
+2. Проверку корректности `--random-seed` и `--epochs`.
+3. Поиск `uv` в текущем окружении или в Windows-путях WSL.
+4. Синхронизацию зависимостей через `uv sync`.
+5. Запуск `prepare_datasets.py` с параметрами модели, датасета, seed, количество эпох и каталогом вывода.
+6. Запуск `validate_pipeline.py` и сохранение метрик в `results/experiments/<model-name>/`.
+
+Доступные параметры:
+
+```text
+--model-name NAME
+--data-path PATH
+--random-seed INTEGER
+--epochs INTEGER
+--output-dir PATH
+-h, --help
+```
+
+Например:
+
+```bash
+bash scripts/run_project.sh \
+  --model-name diabetes_best_model_pipeline \
+  --data-path data/raw \
+  --random-seed 42 \
+  --epochs 100 \
+  --output-dir .
+```
 
 ## Структура проекта
 
