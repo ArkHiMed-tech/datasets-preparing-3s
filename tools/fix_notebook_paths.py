@@ -53,5 +53,7 @@ for cell in notebook["cells"]:
     )
     cell["source"] = source.splitlines(keepends=True)
 
-NOTEBOOK_PATH.write_text(json.dumps(notebook, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+NOTEBOOK_PATH.write_text(
+    json.dumps(notebook, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+)
 print(f"Updated {NOTEBOOK_PATH}")

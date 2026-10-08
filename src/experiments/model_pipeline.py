@@ -44,12 +44,15 @@ def create_pipeline():
             ("feature_engineer", NotebookFeatureEngineer()),
             ("imputer", KNNImputer(n_neighbors=5)),
             ("scaler", StandardScaler()),
-            ("model", LGBMClassifier(
-                learning_rate=0.05,
-                max_depth=3,
-                n_estimators=100,
-                random_state=42,
-                verbose=-1,
-            )),
+            (
+                "model",
+                LGBMClassifier(
+                    learning_rate=0.05,
+                    max_depth=3,
+                    n_estimators=100,
+                    random_state=42,
+                    verbose=-1,
+                ),
+            ),
         ]
     )

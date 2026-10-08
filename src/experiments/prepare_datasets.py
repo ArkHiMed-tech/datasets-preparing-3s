@@ -51,9 +51,7 @@ def load_and_prepare_data() -> tuple[pd.DataFrame, pd.Series]:
 
 def main() -> None:
     X, y = load_and_prepare_data()
-    X_train, _, y_train, _ = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
+    X_train, _, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42)
 
     pipeline = create_pipeline()
     pipeline.fit(X_train, y_train)

@@ -13,35 +13,40 @@
 - `results/experiments/`: журналы, результаты и временные метрики экспериментов.
 - `config/`: конфигурационные и вспомогательные файлы.
 
-## Запуск в Linux
+## Запуск в Linux с uv
 
-1. Создайте виртуальное окружение и установите зависимости:
+1. Установите `uv` и синхронизируйте окружение:
 
    ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   python -m pip install -r config/requirements.txt
+   uv sync
    ```
 
 2. Подготовьте данные:
 
    ```bash
-   python src/experiments/prepare_datasets.py
+   uv run python src/experiments/prepare_datasets.py
    ```
 
 3. Запустите web-приложение:
 
    ```bash
-   streamlit run src/app.py
+   uv run streamlit run src/app.py
    ```
 
-4. Для запуска ноутбука откройте `src/notebooks/main.ipynb` в Jupyter Notebook или VS Code.
+4. Для запуска ноутбука откройте `src/notebooks/main.ipynb` в Jupyter Notebook или VS Code:
+
+   ```bash
+   uv run jupyter notebook
+   ```
 
 ## Важные замечания
 
+- Основной источник зависимостей — `pyproject.toml`.
+- `uv.lock` фиксирует версии зависимостей и создаёт воспроизводимое окружение.
+- `.venv` не отслеживается Git.
+- `config/requirements.txt` и `config/.python-version` оставлены только для совместимости с существующими скриптами.
 - Скрипт подготовки читает исходные CSV из `data/raw/` и сохраняет итоговый датасет в `data/processed/diabetes.csv`.
 - Сохранённая модель записывается в `models/diabetes_best_model_pipeline.pkl`.
-- Установленные зависимости и версия Python фиксируются в `config/requirements.txt` и `config/.python-version`.
 - При необходимости повторного запуска существующие исходные файлы не удаляются.
 
 ## Источники датасета
