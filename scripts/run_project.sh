@@ -24,6 +24,20 @@ Options:
 EOF
 }
 
+normalize_path() {
+    local path="$1"
+
+    if [[ "${path}" =~ ^[A-Za-z]:[\\/] ]]; then
+        if command -v cygpath >/dev/null 2>&1; then
+            path="$(cygpath -u "${path}")"
+        elif command -v wslpath >/dev/null 2>&1; then
+            path="$(wslpath -u "${path}")"
+        fi
+    fi
+
+    printf '%s\n' "${path}"
+}
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --model-name)
@@ -82,11 +96,6 @@ if [[ ! -f "${PROJECT_ROOT}/pyproject.toml" ]]; then
     exit 1
 fi
 
-if [[ ! -d "${DATA_PATH}" && ! -f "${DATA_PATH}" ]]; then
-    echo "Data path does not exist: ${DATA_PATH}" >&2
-    exit 1
-fi
-
 if ! [[ "${RANDOM_SEED}" =~ ^[0-9]+$ ]]; then
     echo "--random-seed must be a non-negative integer" >&2
     exit 2
@@ -96,20 +105,33 @@ if ! [[ "${EPOCHS}" =~ ^[1-9][0-9]*$ ]]; then
     exit 2
 fi
 
+DATA_PATH="$(normalize_path "${DATA_PATH}")"
+OUTPUT_DIR="$(normalize_path "${OUTPUT_DIR}")"
+
 cd "${PROJECT_ROOT}"
-if [[ "${DATA_PATH}" == /mnt/c/* ]]; then
-    DATA_PATH="$(wslpath -a "${DATA_PATH}")"
-elif [[ "${DATA_PATH}" != /* ]]; then
+if [[ "${DATA_PATH}" != /* ]]; then
     DATA_PATH="${PROJECT_ROOT}/${DATA_PATH}"
 fi
-if [[ "${OUTPUT_DIR}" == /mnt/c/* ]]; then
-    OUTPUT_DIR="$(wslpath -a "${OUTPUT_DIR}")"
-elif [[ "${OUTPUT_DIR}" != /* ]]; then
+if [[ "${OUTPUT_DIR}" != /* ]]; then
     OUTPUT_DIR="${PROJECT_ROOT}/${OUTPUT_DIR}"
 fi
 
+if [[ ! -d "${DATA_PATH}" && ! -f "${DATA_PATH}" ]]; then
+    echo "Data path does not exist: ${DATA_PATH}" >&2
+    exit 1
+fi
+
 if [[ "${UV_COMMAND}" == *.exe ]]; then
-    UV_COMMAND="${UV_COMMAND}"
+    if [[ "${DATA_PATH}" == /mnt/* ]] && command -v wslpath >/dev/null 2>&1; then
+        DATA_PATH="$(wslpath -w "${DATA_PATH}")"
+    elif [[ "${DATA_PATH}" == /* ]] && command -v cygpath >/dev/null 2>&1; then
+        DATA_PATH="$(cygpath -w "${DATA_PATH}")"
+    fi
+    if [[ "${OUTPUT_DIR}" == /mnt/* ]] && command -v wslpath >/dev/null 2>&1; then
+        OUTPUT_DIR="$(wslpath -w "${OUTPUT_DIR}")"
+    elif [[ "${OUTPUT_DIR}" == /* ]] && command -v cygpath >/dev/null 2>&1; then
+        OUTPUT_DIR="$(cygpath -w "${OUTPUT_DIR}")"
+    fi
 fi
 
 "${UV_COMMAND}" sync

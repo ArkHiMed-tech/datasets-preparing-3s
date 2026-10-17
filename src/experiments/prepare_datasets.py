@@ -1,9 +1,30 @@
 import argparse
+import re
 from pathlib import Path
 
 import joblib
 import pandas as pd
 from sklearn.model_selection import train_test_split
+
+
+def normalize_path_for_windows(path: str | Path) -> Path:
+    raw_path = str(path)
+
+    if raw_path.startswith("/"):
+        match = re.match(r"^/mnt/(?P<drive>[A-Za-z])/(?P<rest>.+)$", raw_path)
+        if match:
+            return Path(f"{match.group('drive').upper()}:/{match.group('rest')}")
+
+    candidate = raw_path.replace("/", "\\")
+    match = re.match(
+        r"^(?P<drive>[A-Za-z]):\\mnt\\(?P<mount>[A-Za-z])\\(?P<rest>.+)$",
+        candidate,
+    )
+    if match:
+        return Path(f"{match.group('drive')}:\\{match.group('rest')}")
+
+    return Path(raw_path)
+
 
 from model_pipeline import create_pipeline
 
@@ -73,8 +94,10 @@ def main() -> None:
     if args.random_seed < 0:
         parser.error("--random-seed must be non-negative")
 
-    data_path = args.data_path.resolve()
-    output_dir = args.output_dir.resolve()
+    data_path = normalize_path_for_windows(args.data_path)
+    data_path = data_path.resolve()
+    output_dir = normalize_path_for_windows(args.output_dir)
+    output_dir = output_dir.resolve()
     processed_data_path = output_dir / "data" / "processed" / "diabetes.csv"
     model_dir = output_dir / "models"
     model_name = Path(args.model_name).name
